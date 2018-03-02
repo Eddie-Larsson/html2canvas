@@ -230,12 +230,21 @@ export class DocumentCloner {
         }
 
         if (node instanceof HTMLStyleElement && node.sheet && node.sheet.cssRules) {
-            const css = [].slice
-                .call(node.sheet.cssRules, 0)
-                .reduce((css, rule) => css + rule.cssText, '');
-            const style = node.cloneNode(false);
-            style.textContent = css;
-            return style;
+            let self = this;
+                var css = [].slice.call(node.sheet.cssRules, 0).reduce(function (css, rule) {
+                    try {
+                        if (rule && rule.cssText) {
+                            return css + rule.cssText;
+                        }
+                        return css;
+                    } catch (err) {
+                        self.logger.log('Unable to access cssText property', rule.name);
+                        return css;
+                    }
+                }, '');
+                var style = node.cloneNode(false);
+                style.textContent = css;
+                return style;
         }
 
         return node.cloneNode(false);
